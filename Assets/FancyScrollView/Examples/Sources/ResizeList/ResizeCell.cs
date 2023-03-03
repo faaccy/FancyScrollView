@@ -8,7 +8,8 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         [SerializeField] Text message = default;
         [SerializeField] Image image = default;
         [SerializeField] Button button = default;
-
+        private ResizeScrollView scrollView = default;
+        
         private RectTransform rectTransform { get; set; }
         private Vector3 initialSizeData { get; set; }
 
@@ -17,10 +18,12 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             button.onClick.AddListener(() => Context.OnCellClicked?.Invoke(Index));
             rectTransform = (RectTransform)transform;
             initialSizeData = rectTransform.sizeDelta;
+            scrollView = transform.GetComponentInParent<ResizeScrollView>();
         }
 
         private void OnRectTransformDimensionsChange()
         {
+            Context.OnCellSizeChanged?.Invoke(rectTransform.sizeDelta);
             Debug.Log($"OnRectTransformDimensionsChange:{ rectTransform.sizeDelta } {initialSizeData}");
         }
 

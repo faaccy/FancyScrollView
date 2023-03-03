@@ -60,6 +60,11 @@ namespace FancyScrollView
         /// </remarks>
         protected virtual bool Scrollable => MaxScrollPosition > 0f;
 
+        /// <summary>
+        /// 是否存放不规则的cell
+        /// </summary>
+        protected virtual bool VariableScroll { get; set; }
+
         Scroller cachedScroller;
 
         /// <summary>
@@ -87,16 +92,32 @@ namespace FancyScrollView
             base.Initialize();
 
             Context.ScrollDirection = Scroller.ScrollDirection;
-            Context.CalculateScrollSize = () =>
+            Context.CalculateScrollSize = () => { return caculateScrollSize(out var interval); };
+            AdjustCellIntervalAndScrollOffset();
+            Scroller.OnValueChanged(OnScrollerValueChanged);
+
+            foreach (var VARIABLE in ItemsSource)
             {
-                var interval = CellSize + spacing;
+                
+            }
+        }
+
+        private (float ScrollSize, float ReuseMargin) caculateScrollSize(out float interval)
+        {
+            if(!VariableScroll)
+            {
+                interval = CellSize + spacing;
                 var reuseMargin = interval * reuseCellMarginCount;
                 var scrollSize = Scroller.ViewportSize + interval + reuseMargin * 2f;
                 return (scrollSize, reuseMargin);
-            };
-
-            AdjustCellIntervalAndScrollOffset();
-            Scroller.OnValueChanged(OnScrollerValueChanged);
+            }
+            else
+            {
+                interval = Scroller.ViewportSize;
+                var reuseMargin = Scroller.ViewportSize;
+                var scrollSize = Scroller.ViewportSize * 2f;
+                return (scrollSize, reuseMargin);
+            }
         }
 
         /// <summary>
@@ -190,7 +211,7 @@ namespace FancyScrollView
         {
             Scroller.Position = ToScrollerPosition(itemIndex, alignment);
         }
-
+             
         /// <summary>
         /// 指定したアイテムの位置まで移動します.
         /// </summary>
@@ -202,7 +223,7 @@ namespace FancyScrollView
         {
             Scroller.ScrollTo(ToScrollerPosition(index, alignment), duration, onComplete);
         }
-
+        
         /// <summary>
         /// 指定したアイテムの位置まで移動します.
         /// </summary>
@@ -226,6 +247,7 @@ namespace FancyScrollView
             Scroller.Scrollbar.size = Scrollable ? Mathf.Clamp01(viewportLength / contentLength) : 1f;
         }
 
+        //q:以下注释什么意思    a:这个是将FancyScrollView的滚动位置转换为Scroller的滚动位置
         /// <summary>
         /// <see cref="Scroller"/> が扱うスクロール位置を <see cref="FancyScrollRect{TItemData, TContext}"/> が扱うスクロール位置に変換します.
         /// </summary>
@@ -264,6 +286,13 @@ namespace FancyScrollView
         /// <see cref="FancyScrollView{TItemData,TContext}.cellInterval"/> と
         /// <see cref="FancyScrollView{TItemData,TContext}.scrollOffset"/> を計算して適用します.
         /// </summary>
+        protected void DynamicAdjustCellIntervalAndScrollOffset()
+        {
+            var totalSize = Scroller.ViewportSize + (CellSize + spacing) * (1f + reuseCellMarginCount * 2f);
+            cellInterval = (CellSize + spacing) / totalSize;
+            scrollOffset = cellInterval * (1f + reuseCellMarginCount);
+        }
+        
         protected void AdjustCellIntervalAndScrollOffset()
         {
             var totalSize = Scroller.ViewportSize + (CellSize + spacing) * (1f + reuseCellMarginCount * 2f);

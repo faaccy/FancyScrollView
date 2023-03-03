@@ -76,7 +76,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         void GenerateCells(int dataCount)
         {
             var items = Enumerable.Range(0, dataCount)
-                .Select(i => new ItemData($"Cell {i}"))
+                .Select(i => new ItemData($"Cell {i}",200))
                 .ToArray();
 
             scrollView.UpdateData(items);

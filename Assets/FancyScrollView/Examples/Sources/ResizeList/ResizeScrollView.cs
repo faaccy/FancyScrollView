@@ -44,6 +44,11 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             }
         }
 
+        public void OnCellSizeChanged(Action<Vector3> callback)
+        {
+            Context.OnCellSizeChanged = callback;
+        }
+
         public void OnCellClicked(Action<int> callback)
         {
             Context.OnCellClicked = callback;
