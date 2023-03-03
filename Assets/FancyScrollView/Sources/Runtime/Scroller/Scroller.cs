@@ -146,6 +146,7 @@ namespace FancyScrollView
 
         Action<float> onValueChanged;
         Action<int> onSelectionChanged;
+        Action<Vector3> onItemSizeChanged;
 
         Vector2 beginDragPointerPosition;
         float scrollStartPosition;
@@ -220,6 +221,8 @@ namespace FancyScrollView
         /// </summary>
         /// <param name="callback">選択位置が変化したときのコールバック.</param>
         public void OnSelectionChanged(Action<int> callback) => onSelectionChanged = callback;
+        
+        public void OnItemSizeChanged(Action<Vector3> callback) => onItemSizeChanged = callback;
 
         /// <summary>
         /// アイテムの総数を設定します.
