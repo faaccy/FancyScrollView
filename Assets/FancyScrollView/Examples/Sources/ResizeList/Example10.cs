@@ -8,7 +8,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
 {
     public class Example10 : MonoBehaviour
     {
-        [SerializeField] ResizeScrollView scrollView = default;
+        [SerializeField] MutableScrollView scrollView = default;
         [SerializeField] InputField paddingTopInputField = default;
         [SerializeField] InputField paddingBottomInputField = default;
         [SerializeField] InputField spacingInputField = default;
@@ -76,10 +76,16 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         void GenerateCells(int dataCount)
         {
             var items = Enumerable.Range(0, dataCount)
-                .Select(i => new ItemData($"Cell {i}"))
+                .Select(i => new MutableItemData($"Cell {i}"))
                 .ToArray();
-
-            scrollView.UpdateData(items);
+            var mappings = items.Select((c,index) => new MutablePrefabMapping()
+            {
+                DataSourceIndex = index,
+                PrefabIndex = index%2==0 ? 0 : 1,
+                Flex = index%2==0 ? 100:200
+            }).ToArray();
+ 
+            scrollView.UpdateData(items,mappings);
             SelectCell();
         }
     }

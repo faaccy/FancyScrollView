@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311918, g: 0.38073993, b: 0.35872698, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -632,6 +632,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellInterval: 0.13253012
   scrollOffset: 0.13253012
+  prefabList:
+  - {fileID: 1865951358068953824, guid: c1ee12a40dbfd164e9de30cfbc36682c, type: 3}
+  - {fileID: 1865951358068953824, guid: 60c4ff4ac2a4d444daba41d88c79f86a, type: 3}
   loop: 0
   cellContainer: {fileID: 1230771801}
   reuseCellMarginCount: 0
@@ -639,8 +642,6 @@ MonoBehaviour:
   paddingTail: 10
   spacing: 10
   cellSize: 100
-  cellPrefab: {fileID: 1865951358068953824, guid: c1ee12a40dbfd164e9de30cfbc36682c,
-    type: 3}
 --- !u!114 &190094664
 MonoBehaviour:
   m_ObjectHideFlags: 0

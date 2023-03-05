@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace FancyScrollView.Examples.Sources.ResizeList
 {
-    public class ResizeScrollView : FancyScrollRect<ItemData, Context>
+    public class MutableScrollView : MutableScrollRect<MutableItemData, Context>
     {
         [SerializeField] float cellSize = 100f;
-        [SerializeField] GameObject cellPrefab = default;
 
-        protected override float CellSize => cellSize;
-        protected override GameObject CellPrefab => cellPrefab;
+        protected override float FlexBase => cellSize;
+     
         public int DataCount => ItemsSource.Count;
+        
 
         public float PaddingTop
         {
@@ -49,9 +49,9 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             Context.OnCellClicked = callback;
         }
 
-        public void UpdateData(IList<ItemData> items)
+        public void UpdateData(IList<MutableItemData> items,IList<MutablePrefabMapping> mappings)
         {
-            UpdateContents(items);
+            UpdateContents(items,mappings);
         }
 
         public void ScrollTo(int index, float duration, Ease easing, Alignment alignment = Alignment.Middle)
