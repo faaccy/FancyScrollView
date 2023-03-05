@@ -21,7 +21,7 @@ namespace FancyScrollView
 
         protected bool initialized;
 
-        protected float currentPosition;
+        protected float currentPosition { get; set; }
 
         protected IList<TItemData> ItemsSource { get; set; } = new List<TItemData>();
 
@@ -112,12 +112,14 @@ namespace FancyScrollView
                 }
 
                 //超出可视范围的cell隐藏
-                if (index < 0 || index >= ItemsSource.Count || position > maxCellInterval)
+                if (index < 0 || index >= ItemsSource.Count || position > 1)
                 {
                     cell.SetVisible(false);
                     continue;
                 }
-                //更新cell内容：1.替换原油cell（flex1-2 prefab也发生了变换）2。更新cell的内容
+                //更新cell内容：
+                //1.替换原油cell（flex1-2 prefab也发生了变换）
+                //2.更新cell的内容
                 if (forceRefresh || cell.Index != index || !cell.IsVisible)
                 {
                     cell.Index = index;

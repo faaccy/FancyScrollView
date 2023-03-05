@@ -9,8 +9,6 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         [SerializeField] Image image = default;
         [SerializeField] Button button = default;
 
-        public string DisplayName;
-
         private RectTransform rectTransform { get; set; }
         private Vector3 initialSizeData { get; set; }
 
@@ -29,7 +27,6 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         public override void UpdateContent(MutableItemData itemData)
         {
             message.text = itemData.Message;
-            DisplayName = itemData.Message;
 
             var selected = Context.SelectedIndex == Index;
             image.color = selected
