@@ -7,43 +7,6 @@ namespace FancyScrollView.Examples.Sources.ResizeList
 {
     public class MutableScrollView : MutableScrollRect<MutableItemData, Context>
     {
-        [SerializeField] float cellSize = 100f;
-
-        protected override float FlexBase => cellSize;
-     
-        public int DataCount => ItemsSource.Count;
-        
-
-        public float PaddingTop
-        {
-            get => paddingHead;
-            set
-            {
-                paddingHead = value;
-                Relayout();
-            }
-        }
-
-        public float PaddingBottom
-        {
-            get => paddingTail;
-            set
-            {
-                paddingTail = value;
-                Relayout();
-            }
-        }
-
-        public float Spacing
-        {
-            get => spacing;
-            set
-            {
-                spacing = value;
-                Relayout();
-            }
-        }
-
         public void OnCellSizeChanged(Action<Vector3> callback)
         {
             Context.OnCellSizeChanged = callback;

@@ -5,17 +5,63 @@ namespace FancyScrollView
 {
     public abstract class MutableScrollView<TItemData, TContext> : MonoBehaviour where TContext : class, new()
     {
+        [SerializeField] public float reuseCellMarginCount = 0f;
+
+        [SerializeField] public float paddingHead = 0f;
+
+        [SerializeField] public float paddingTail = 0f;
+        /// <summary>
+        /// cell基准大小,当cell大小不一致时,取平均值或者较小值
+        /// </summary>
+        [SerializeField] public float flex = 100f;
+
+        [SerializeField] public float spacing = 0f;
+        
         [SerializeField, Range(1e-2f, 1f)] protected float cellInterval = 0.2f;
 
         [SerializeField, Range(0f, 1f)] protected float scrollOffset = 0.5f;
         
-        [SerializeField, Range(1e-2f, 100f)] protected float maxCellInterval = 2f;
+        [SerializeField, Range(1e-2f, 100f)] protected float maxCellInterval = 1f;
 
         [SerializeField] GameObject[] prefabList;
 
         [SerializeField] protected bool loop = false;
 
         [SerializeField] protected Transform cellContainer = default;
+     
+        public int DataCount => ItemsSource.Count;
+        
+        protected float ScrollSize = 100f;
+        
+        public float PaddingTop
+        {
+            get => paddingHead;
+            set
+            {
+                paddingHead = value;
+                Relayout();
+            }
+        }
+
+        public float PaddingBottom
+        {
+            get => paddingTail;
+            set
+            {
+                paddingTail = value;
+                Relayout();
+            }
+        }
+
+        public float Spacing
+        {
+            get => spacing;
+            set
+            {
+                spacing = value;
+                Relayout();
+            }
+        }
 
         readonly IList<BaseCell<TItemData,TContext>> pool = new List<BaseCell<TItemData,TContext>>();
 
@@ -31,6 +77,7 @@ namespace FancyScrollView
 
         protected virtual void Initialize()
         {
+            
         }
 
         protected virtual void UpdateContents(IList<TItemData> itemsSource,IList<MutablePrefabMapping> mappings)
@@ -65,6 +112,7 @@ namespace FancyScrollView
             UpdateCells(firstPosition, firstIndex, forceRefresh);
         }
 
+        private float sumCellInterval = 0f;
         /// <summary>
         /// 根绝当前的scroll view 位置计算当前pool构造
         /// </summary>
@@ -73,19 +121,19 @@ namespace FancyScrollView
         {
             var count = ItemMappings.Count;
             if (count <= 0) return;
-            var sum = 0f;
+        
             for (var i = 0; i < count; i++)
             {
-                var flex = ItemMappings[i].Flex;
-                var currentInterval = cellInterval * flex;
-                sum+= currentInterval;
-                if(sum > maxCellInterval) break;
+                var cellSize = ItemMappings[i].CellSize;
+                var currentInterval = cellInterval * i;
+                sumCellInterval += currentInterval;
+                if(sumCellInterval > maxCellInterval) break;
                 
                 var prefab = prefabList[ItemMappings[i].PrefabIndex];
                 var cell = Instantiate(prefab, cellContainer)
                     .GetComponent<BaseCell<TItemData,TContext>>();
                 cell.Initialize();
-                cell.Flex = flex;
+                cell.CellSize = cellSize;
                 cell.SetVisible(false);
                 pool.Add(cell);
             }
@@ -100,39 +148,59 @@ namespace FancyScrollView
         /// <param name="forceRefresh"></param>
         private void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
         {
+            var position = firstPosition;
             for (var i = 0; i < pool.Count; i++)
             {
                 var index = firstIndex + i;
                 var cell = pool[CircularIndex(index, pool.Count)];
-                var position = firstPosition + i * cell.Flex * cellInterval;
-
+                position += CaculateInterval(cell.CellSize);
+           
                 if (loop)
                 {
                     index = CircularIndex(index, ItemsSource.Count);
                 }
 
-                //超出可视范围的cell隐藏
                 if (index < 0 || index >= ItemsSource.Count || position > 1)
                 {
                     cell.SetVisible(false);
                     continue;
                 }
-                //更新cell内容：
-                //1.替换原油cell（flex1-2 prefab也发生了变换）
-                //2.更新cell的内容
+            
                 if (forceRefresh || cell.Index != index || !cell.IsVisible)
                 {
-                    cell.Index = index;
-                    cell.SetVisible(true);
-                    cell.Flex = ItemMappings[index].Flex;
-                    cell.UpdateContent(ItemsSource[index]);
-                    
-                    //如果当前位置的cell 需要替换
+                    var cellSize =  ItemMappings[index].CellSize;
+                    if(cell.CellSize != cellSize)
+                    {
+                        position = position - cell.CellSize * cellInterval;
+                        var prefab = prefabList[ItemMappings[index].PrefabIndex];
+                        cell = Instantiate(prefab, cellContainer)
+                            .GetComponent<BaseCell<TItemData,TContext>>();
+                        position = position + cell.CellSize * cellInterval;
+                        cell.Initialize();
+                        cell.CellSize = ItemMappings[index].CellSize;
+                        cell.SetContext(Context);
+                        cell.SetVisible(true);
+                        pool.Add(cell);
+                        sumCellInterval += cell.CellSize * cellInterval;
+                        cell.UpdateContent(ItemsSource[index]);
+                        
+                    }
+                    else
+                    {
+                        cell.Index = index;
+                        cell.SetVisible(true);
+                        cell.SetContext(Context);
+                        cell.UpdateContent(ItemsSource[index]);
+                    }
                 }
-                //更新cell的位置
                 cell.UpdatePosition(position);
             }
         }
+
+        float CaculateInterval(float cellSize)
+        {
+            return (cellSize+spacing) / ScrollSize;
+        }       
 
         int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
 

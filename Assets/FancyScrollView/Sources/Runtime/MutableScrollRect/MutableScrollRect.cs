@@ -10,64 +10,22 @@ namespace FancyScrollView
     public abstract class MutableScrollRect<TItemData, TContext> : MutableScrollView<TItemData, TContext>
         where TContext : class, IMutableScrollRectContext, new()
     {
-        /// <summary>
-        /// スクロール中にセルが再利用されるまでの余白のセル数.
-        /// </summary>
-        /// <remarks>
-        /// <c>0</c> を指定するとセルが完全に隠れた直後に再利用されます.//q:这段注释是什么意思？   //a:这个是原作者的注释，意思是当你滑动的时候，当你滑动到某个cell完全不可见的时候，这个cell就会被回收，然后重新利用
-        /// <c>1</c> 以上を指定すると, そのセル数だけ余分にスクロールしてから再利用されます.//q:这段注释什么意思？ //a:这个是原作者的注释，意思是当你滑动的时候，当你滑动到某个cell完全不可见的时候，这个cell就会被回收，然后重新利用，但是这个cell会被回收的时候，会多滑动一个cell的距离，然后再回收
-        /// </remarks>
-        [SerializeField] protected float reuseCellMarginCount = 0f;
-
-        /// <summary>
-        /// コンテンツ先頭の余白.
-        /// </summary>
-        [SerializeField] protected float paddingHead = 0f;
-
-        /// <summary>
-        /// コンテンツ末尾の余白.
-        /// </summary>
-        [SerializeField] protected float paddingTail = 0f;
-
-        /// <summary>
-        /// スクロール軸方向のセル同士の余白.
-        /// </summary>
-        [SerializeField] protected float spacing = 0f;
-
-        /// <summary>
-        /// セルのサイズ.
-        /// </summary>
-        protected abstract float FlexBase { get; }
-
-        /// <summary>
-        /// スクロール可能かどうか.
-        /// </summary>
-        /// <remarks>
-        /// 是否可以滑动
-        /// アイテム数が十分少なくビューポート内に全てのセルが収まっている場合は <c>false</c>, それ以外は <c>true</c> になります.
-        /// </remarks>
         protected virtual bool Scrollable => MaxScrollPosition > 0f;
 
         Scroller cachedScroller;
 
-        /// <summary>
-        /// スクロール位置を制御する <see cref="FancyScrollView.Scroller"/> のインスタンス.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="Scroller"/> のスクロール位置を変更する際は必ず <see cref="ToScrollerPosition(float)"/> を使用して変換した位置を使用してください.
-        /// </remarks>
         protected Scroller Scroller => cachedScroller ?? (cachedScroller = GetComponent<Scroller>());
 
         float ScrollLength => 1f / Mathf.Max(cellInterval, 1e-2f) - 1f;
 
         float ViewportLength => ScrollLength - reuseCellMarginCount * 2f;
 
-        float PaddingHeadLength => (paddingHead - spacing * 0.5f) / (FlexBase + spacing);
+        float PaddingHeadLength => (paddingHead - spacing * 0.5f) / (flex + spacing);
 
         float MaxScrollPosition => ItemsSource.Count
             - ScrollLength
             + reuseCellMarginCount * 2f
-            + (paddingHead + paddingTail - spacing) / (FlexBase + spacing);
+            + (paddingHead + paddingTail - spacing) / (flex + spacing);
 
         /// <inheritdoc/>
         protected override void Initialize()
@@ -76,14 +34,8 @@ namespace FancyScrollView
             Debug.Log("Initialize");
 
             Context.ScrollDirection = Scroller.ScrollDirection;
-            Context.CalculateScrollSize = () =>
-            {
-                var interval = FlexBase + spacing;
-                var reuseMargin = interval * reuseCellMarginCount;
-                var scrollSize = Scroller.ViewportSize + interval + reuseMargin * 2f;
-                return (scrollSize, reuseMargin);
-            };
-
+            ScrollSize = Scroller.ViewportSize * 2f;
+            
             AdjustCellIntervalAndScrollOffset();
             Scroller.OnValueChanged(OnScrollerValueChanged);
         }
@@ -210,7 +162,7 @@ namespace FancyScrollView
         /// <param name="viewportLength">ビューポートのサイズ.</param>
         protected void UpdateScrollbarSize(float viewportLength)
         {
-            var contentLength = Mathf.Max(ItemsSource.Count + (paddingHead + paddingTail - spacing) / (FlexBase + spacing), 1);
+            var contentLength = Mathf.Max(ItemsSource.Count + (paddingHead + paddingTail - spacing) / (flex + spacing), 1);
             Scroller.Scrollbar.size = Scrollable ? Mathf.Clamp01(viewportLength / contentLength) : 1f;
         }
 
@@ -243,7 +195,7 @@ namespace FancyScrollView
         protected float ToScrollerPosition(float position, float alignment = 0.5f)
         {
             var offset = alignment * (ScrollLength - (1f + reuseCellMarginCount * 2f))
-                + (1f - alignment - 0.5f) * spacing / (FlexBase + spacing);
+                + (1f - alignment - 0.5f) * spacing / (flex + spacing);
             return ToScrollerPosition(Mathf.Clamp(position - offset, 0f, MaxScrollPosition));
         }
 
@@ -254,8 +206,8 @@ namespace FancyScrollView
         /// </summary>
         protected void AdjustCellIntervalAndScrollOffset()
         {
-            var totalSize = Scroller.ViewportSize + (FlexBase + spacing) * (1f + reuseCellMarginCount * 2f);
-            cellInterval = (FlexBase + spacing) / totalSize;
+            var totalSize = Scroller.ViewportSize + (flex + spacing) * (1f + reuseCellMarginCount * 2f);
+            cellInterval = (flex + spacing) / totalSize;
             scrollOffset = cellInterval * (1f + reuseCellMarginCount);
         }
      

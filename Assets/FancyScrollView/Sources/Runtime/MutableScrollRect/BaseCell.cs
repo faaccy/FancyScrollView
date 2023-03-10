@@ -10,52 +10,22 @@ namespace FancyScrollView
 {
     public abstract class BaseCell<TItemData, TContext> : MonoBehaviour where TContext : class, new()
     {
-        /// <summary>
-        /// このセルで表示しているデータのインデックス.
-        /// q:上述注释什么意思？     
-        /// </summary>
         public int Index { get; set; } = -1;
 
-        public float Flex { get; set; } = 1f;
+        public float CellSize { get; set; } = 100f;
 
-        /// <summary>
-        /// このセルの可視状態.
-        /// </summary>
         public virtual bool IsVisible => gameObject.activeSelf;
 
-        /// <summary>
-        /// <see cref="FancyScrollView{TItemData, TContext}.Context"/> の参照.
-        /// セルとスクロールビュー間で同じインスタンスが共有されます. 情報の受け渡しや状態の保持に使用します.
-        /// </summary>
         protected TContext Context { get; private set; }
 
-        /// <summary>
-        /// <see cref="Context"/> をセットします.
-        /// </summary>
-        /// <param name="context">コンテキスト.</param>
         public virtual void SetContext(TContext context) => Context = context;
 
-        /// <summary>
-        /// 初期化を行います.
-        /// </summary>
         public virtual void Initialize() { }
 
-        /// <summary>
-        /// このセルの可視状態を設定します.
-        /// </summary>
-        /// <param name="visible">可視状態なら <c>true</c>, 非可視状態なら <c>false</c>.</param>
         public virtual void SetVisible(bool visible) => gameObject.SetActive(visible);
 
-        /// <summary>
-        /// アイテムデータに基づいてこのセルの表示内容を更新します.
-        /// </summary>
-        /// <param name="itemData">アイテムデータ.</param>
         public abstract void UpdateContent(TItemData itemData);
 
-        /// <summary>
-        /// <c>0.0f</c> ~ <c>1.0f</c> の値に基づいてこのセルのスクロール位置を更新します.
-        /// </summary>
-        /// <param name="position">ビューポート範囲の正規化されたスクロール位置.</param>
         public abstract void UpdatePosition(float position);
     }
 

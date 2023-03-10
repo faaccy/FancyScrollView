@@ -16,7 +16,8 @@ namespace FancyScrollView
         /// <inheritdoc/>
         public override void UpdatePosition(float position)
         {
-            var (scrollSize, reuseMargin) = Context.CalculateScrollSize();
+            var scrollSize = Context.ScrollSize;
+            var reuseMargin = 0f;//TODO:decide how to use this
 
             var normalizedPosition = (Mathf.Lerp(0f, scrollSize, position) - reuseMargin) / (scrollSize - reuseMargin * 2f);
 

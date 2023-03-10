@@ -82,7 +82,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             {
                 DataSourceIndex = index,
                 PrefabIndex = index%2==0 ? 0 : 1,
-                Flex = index%2==0 ? 100:200
+                CellSize = index%2==0 ? 100:200
             }).ToArray();
  
             scrollView.UpdateData(items,mappings);

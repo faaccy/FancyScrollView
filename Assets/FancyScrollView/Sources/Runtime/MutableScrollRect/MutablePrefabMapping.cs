@@ -19,6 +19,6 @@ namespace FancyScrollView
         /// <summary>
         /// cell size of the  FlexBase
         /// </summary>
-        public float Flex { get; set; }
+        public float CellSize { get; set; }
     }
 }
