@@ -46,7 +46,7 @@ namespace FancyScrollView
         /// </summary>
         [SerializeField] protected Transform cellContainer = default;
 
-        readonly IList<FancyCell<TItemData, TContext>> pool = new List<FancyCell<TItemData, TContext>>();
+        protected readonly IList<FancyCell<TItemData, TContext>> pool = new List<FancyCell<TItemData, TContext>>();
 
         /// <summary>
         /// 初期化済みかどうか.
@@ -56,7 +56,7 @@ namespace FancyScrollView
         /// <summary>
         /// 現在のスクロール位置.
         /// </summary>
-        protected float currentPosition;
+        protected float currentPosition { get; private set; }
 
         /// <summary>
         /// セルの Prefab.
@@ -130,12 +130,13 @@ namespace FancyScrollView
             UpdateCells(firstPosition, firstIndex, forceRefresh);
         }
 
-        void ResizePool(float firstPosition)
+        protected virtual void ResizePool(float firstPosition)
         {
             Debug.Assert(CellPrefab != null);
             Debug.Assert(cellContainer != null);
 
             var addCount = Mathf.CeilToInt((1f - firstPosition) / cellInterval) - pool.Count;
+
             for (var i = 0; i < addCount; i++)
             {
                 var cell = Instantiate(CellPrefab, cellContainer).GetComponent<FancyCell<TItemData, TContext>>();
@@ -153,14 +154,13 @@ namespace FancyScrollView
             }
         }
 
-        void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
+        protected  virtual void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
         {
             for (var i = 0; i < pool.Count; i++)
             {
                 var index = firstIndex + i;
                 var position = firstPosition + i * cellInterval;
                 var cell = pool[CircularIndex(index, pool.Count)];
-
                 if (loop)
                 {
                     index = CircularIndex(index, ItemsSource.Count);
@@ -183,7 +183,7 @@ namespace FancyScrollView
             }
         }
 
-        int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
+        protected int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
 
 #if UNITY_EDITOR
         bool cachedLoop;

@@ -36,6 +36,8 @@ namespace FancyScrollView
         /// コンテンツ先頭の余白.
         /// </summary>
         [SerializeField] protected float paddingHead = 0f;
+        
+        [SerializeField] protected float head = 0f;
 
         /// <summary>
         /// コンテンツ末尾の余白.
@@ -80,11 +82,13 @@ namespace FancyScrollView
         float ViewportLength => ScrollLength - reuseCellMarginCount * 2f;
 
         float PaddingHeadLength => (paddingHead - spacing * 0.5f) / (CellSize + spacing);
+        
+        float HeadLength => (head - spacing * 0.5f) / (CellSize + spacing);
 
         float MaxScrollPosition => ItemsSource.Count
             - ScrollLength
             + reuseCellMarginCount * 2f
-            + (paddingHead + paddingTail - spacing) / (CellSize + spacing);
+            + (paddingHead + paddingTail+head - spacing) / (CellSize + spacing);
 
         /// <inheritdoc/>
         protected override void Initialize()
@@ -217,6 +221,7 @@ namespace FancyScrollView
         /// <param name="onComplete">移動が完了した際に呼び出されるコールバック.</param>
         protected virtual void ScrollTo(int index, float duration, Ease easing, float alignment = 0.5f, Action onComplete = null)
         {
+            Debug.Log(index);
             Scroller.ScrollTo(ToScrollerPosition(index, alignment), duration, easing, onComplete);
         }
 
@@ -278,9 +283,11 @@ namespace FancyScrollView
         
         protected void AdjustCellIntervalAndScrollOffset()
         {
-            var totalSize = Scroller.ViewportSize + (CellSize + spacing) * (1f + reuseCellMarginCount * 2f);
+            var totalSize = Scroller.ViewportSize + (CellSize + spacing) * (1f + reuseCellMarginCount * 2f) + HeadLength;
             cellInterval = (CellSize + spacing) / totalSize;
-            scrollOffset = cellInterval * (1f + reuseCellMarginCount);
+            var headInterval = (head + spacing) / totalSize;
+            scrollOffset = cellInterval * (1f + reuseCellMarginCount)+headInterval;
+           
         }
 
         protected virtual void OnValidate()

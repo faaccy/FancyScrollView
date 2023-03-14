@@ -20,7 +20,9 @@ namespace FancyScrollView
         /// <summary>
         /// このセルで表示しているデータのインデックス.
         /// </summary>
-        public int Index { get; set; } = -1;
+        public int Index = -1;
+        
+        public bool IsHeader = false;
 
         /// <summary>
         /// このセルの可視状態.
