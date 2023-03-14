@@ -34,7 +34,12 @@ namespace FancyScrollView
             Debug.Log("Initialize");
 
             Context.ScrollDirection = Scroller.ScrollDirection;
-            ScrollSize = Scroller.ViewportSize * 2f;
+            Context.CalculateScrollSize = () => {  
+                var interval = flex + spacing;
+                var reuseMargin = interval * reuseCellMarginCount;
+                var scrollSize = Scroller.ViewportSize + interval + reuseMargin * 2f;
+                return (scrollSize, reuseMargin);
+            };
             
             AdjustCellIntervalAndScrollOffset();
             Scroller.OnValueChanged(OnScrollerValueChanged);

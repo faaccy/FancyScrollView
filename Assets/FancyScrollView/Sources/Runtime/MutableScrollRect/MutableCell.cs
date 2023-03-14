@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace FancyScrollView
 {
-    public abstract class BaseCell<TItemData, TContext> : MonoBehaviour where TContext : class, new()
+    public abstract class MutableCell<TItemData, TContext> : MonoBehaviour where TContext : class, new()
     {
-        public int Index { get; set; } = -1;
+        public int Index = -1;
 
         public float CellSize { get; set; } = 100f;
 
@@ -34,7 +34,7 @@ namespace FancyScrollView
     /// </summary>
     /// <typeparam name="TItemData">アイテムのデータ型.</typeparam>
     /// <seealso cref="FancyCell{TItemData, TContext}"/>
-    public abstract class BaseCell<TItemData> : FancyCell<TItemData, NullContext>
+    public abstract class MutableCell<TItemData> : FancyCell<TItemData, NullContext>
     {
         /// <inheritdoc/>
         public sealed override void SetContext(NullContext context) => base.SetContext(context);

@@ -16,6 +16,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         [SerializeField] InputField selectIndexInputField = default;
         [SerializeField] Dropdown alignmentDropdown = default;
 
+        private int selectIndex = 0;
         void Start()
         {
             scrollView.OnCellClicked(index => selectIndexInputField.text = index.ToString());
@@ -37,13 +38,13 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             alignmentDropdown.value = (int)Alignment.Middle;
 
             selectIndexInputField.onValueChanged.AddListener(_ => SelectCell());
-            selectIndexInputField.text = "10";
+            selectIndexInputField.text = selectIndex.ToString();
 
             dataCountInputField.onValueChanged.AddListener(_ =>
                 TryParseValue(dataCountInputField, 1, 99999, GenerateCells));
             dataCountInputField.text = "20";
 
-            scrollView.JumpTo(10);
+            scrollView.JumpTo(selectIndex);
         }
 
         void TryParseValue(InputField inputField, int min, int max, Action<int> success)

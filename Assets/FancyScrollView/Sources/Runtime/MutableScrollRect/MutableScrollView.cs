@@ -63,7 +63,7 @@ namespace FancyScrollView
             }
         }
 
-        readonly IList<BaseCell<TItemData,TContext>> pool = new List<BaseCell<TItemData,TContext>>();
+        readonly IList<MutableCell<TItemData,TContext>> pool = new List<MutableCell<TItemData,TContext>>();
 
         protected bool initialized;
 
@@ -131,7 +131,7 @@ namespace FancyScrollView
                 
                 var prefab = prefabList[ItemMappings[i].PrefabIndex];
                 var cell = Instantiate(prefab, cellContainer)
-                    .GetComponent<BaseCell<TItemData,TContext>>();
+                    .GetComponent<MutableCell<TItemData,TContext>>();
                 cell.Initialize();
                 cell.CellSize = cellSize;
                 cell.SetVisible(false);
@@ -148,13 +148,22 @@ namespace FancyScrollView
         /// <param name="forceRefresh"></param>
         private void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
         {
+            var totalSize = (flex+spacing) /cellInterval;
             var position = firstPosition;
+            var pre = flex;
+            var current = 0f;
             for (var i = 0; i < pool.Count; i++)
             {
                 var index = firstIndex + i;
                 var cell = pool[CircularIndex(index, pool.Count)];
-                position += CaculateInterval(cell.CellSize);
-           
+                if (index >= 0)
+                {
+                    current = cell.CellSize;
+                    var interval = ((current + pre) * 0.5f + spacing) / totalSize;
+                    position += interval;
+                    pre = current;
+                }
+                
                 if (loop)
                 {
                     index = CircularIndex(index, ItemsSource.Count);
@@ -168,24 +177,24 @@ namespace FancyScrollView
             
                 if (forceRefresh || cell.Index != index || !cell.IsVisible)
                 {
-                    var cellSize =  ItemMappings[index].CellSize;
-                    if(cell.CellSize != cellSize)
-                    {
-                        position = position - cell.CellSize * cellInterval;
-                        var prefab = prefabList[ItemMappings[index].PrefabIndex];
-                        cell = Instantiate(prefab, cellContainer)
-                            .GetComponent<BaseCell<TItemData,TContext>>();
-                        position = position + cell.CellSize * cellInterval;
-                        cell.Initialize();
-                        cell.CellSize = ItemMappings[index].CellSize;
-                        cell.SetContext(Context);
-                        cell.SetVisible(true);
-                        pool.Add(cell);
-                        sumCellInterval += cell.CellSize * cellInterval;
-                        cell.UpdateContent(ItemsSource[index]);
-                        
-                    }
-                    else
+                    // var cellSize =  ItemMappings[index].CellSize;
+                    // if(cell.CellSize != cellSize)
+                    // {
+                    //     position = position - cell.CellSize * cellInterval;
+                    //     var prefab = prefabList[ItemMappings[index].PrefabIndex];
+                    //     cell = Instantiate(prefab, cellContainer)
+                    //         .GetComponent<BaseCell<TItemData,TContext>>();
+                    //     position = position + cell.CellSize * cellInterval;
+                    //     cell.Initialize();
+                    //     cell.CellSize = ItemMappings[index].CellSize;
+                    //     cell.SetContext(Context);
+                    //     cell.SetVisible(true);
+                    //     pool.Add(cell);
+                    //     sumCellInterval += cell.CellSize * cellInterval;
+                    //     cell.UpdateContent(ItemsSource[index]);
+                    //     
+                    // }
+                    // else
                     {
                         cell.Index = index;
                         cell.SetVisible(true);
@@ -197,12 +206,7 @@ namespace FancyScrollView
             }
         }
 
-        float CaculateInterval(float cellSize)
-        {
-            return (cellSize+spacing) / ScrollSize;
-        }       
-
-        int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
+        protected int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
 
 #if UNITY_EDITOR
         bool cachedLoop;

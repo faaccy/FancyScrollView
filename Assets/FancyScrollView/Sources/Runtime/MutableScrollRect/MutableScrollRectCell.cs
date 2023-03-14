@@ -10,20 +10,20 @@ namespace FancyScrollView
     /// </summary>
     /// <typeparam name="TItemData">アイテムのデータ型.</typeparam>
     /// <typeparam name="TContext"><see cref="FancyCell{TItemData, TContext}.Context"/> の型.</typeparam>
-    public abstract class MutableScrollRectCell<TItemData, TContext> : BaseCell<TItemData, TContext>
+    public abstract class MutableScrollRectCell<TItemData, TContext> : MutableCell<TItemData, TContext>
         where TContext : class, IMutableScrollRectContext, new()
     {
         /// <inheritdoc/>
         public override void UpdatePosition(float position)
         {
-            var scrollSize = Context.ScrollSize;
-            var reuseMargin = 0f;//TODO:decide how to use this
-
+            var (scrollSize, reuseMargin) = Context.CalculateScrollSize();
             var normalizedPosition = (Mathf.Lerp(0f, scrollSize, position) - reuseMargin) / (scrollSize - reuseMargin * 2f);
 
             var start = 0.5f * scrollSize;
             var end = -start;
-
+            
+            Debug.Log($"{start} : {end}");
+            
             UpdatePosition(normalizedPosition, Mathf.Lerp(start, end, position));
         }
 
