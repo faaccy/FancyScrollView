@@ -21,9 +21,6 @@ namespace FancyScrollView
 
             var start = 0.5f * scrollSize;
             var end = -start;
-            
-            Debug.Log($"{start} : {end}");
-            
             UpdatePosition(normalizedPosition, Mathf.Lerp(start, end, position));
         }
 
@@ -41,6 +38,16 @@ namespace FancyScrollView
             transform.localPosition = Context.ScrollDirection == ScrollDirection.Horizontal
                 ? new Vector2(-localPosition, 0)
                 : new Vector2(0, localPosition);
+        }
+        
+        protected void OnRectTransformDimensionsChange()
+        {
+            var rectTransform = GetComponent<RectTransform>();
+            Context.OnCellSizeChanged?.Invoke(Index,rectTransform.sizeDelta);
+            CellSize = Context.ScrollDirection == ScrollDirection.Horizontal
+                ? rectTransform.sizeDelta.x
+                : rectTransform.sizeDelta.y;
+            Debug.Log($"OnRectTransformDimensionsChange:{ rectTransform.sizeDelta }");
         }
     }
 

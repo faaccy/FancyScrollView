@@ -27,6 +27,8 @@ namespace FancyScrollView
         public abstract void UpdateContent(TItemData itemData);
 
         public abstract void UpdatePosition(float position);
+        
+        public virtual void Destroy() => Destroy(gameObject);
     }
 
     /// <summary>

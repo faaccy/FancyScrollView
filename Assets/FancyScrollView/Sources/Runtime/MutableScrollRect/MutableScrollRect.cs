@@ -16,7 +16,7 @@ namespace FancyScrollView
 
         protected Scroller Scroller => cachedScroller ?? (cachedScroller = GetComponent<Scroller>());
 
-        float ScrollLength => 1f / Mathf.Max(cellInterval, 1e-2f) - 1f;
+        float ScrollLength = 0f;
 
         float ViewportLength => ScrollLength - reuseCellMarginCount * 2f;
 
@@ -41,8 +41,22 @@ namespace FancyScrollView
                 return (scrollSize, reuseMargin);
             };
             
+            Context.OnCellSizeChanged = OnCellSizeChanged;
+
             AdjustCellIntervalAndScrollOffset();
             Scroller.OnValueChanged(OnScrollerValueChanged);
+        }
+
+        /// <summary>
+        /// update cell size and relayout
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="v"></param>
+        private void OnCellSizeChanged(int index,Vector3 v)
+        {
+            ItemMappings[index].CellSize = v.y;
+            pool[CircularIndex(index,pool.Count)].CellSize = v.y;
+            Relayout();
         }
 
         /// <summary>
@@ -211,11 +225,25 @@ namespace FancyScrollView
         /// </summary>
         protected void AdjustCellIntervalAndScrollOffset()
         {
-            var totalSize = Scroller.ViewportSize + (flex + spacing) * (1f + reuseCellMarginCount * 2f);
             cellInterval = (flex + spacing) / totalSize;
             scrollOffset = cellInterval * (1f + reuseCellMarginCount);
+            UpdateScrollLength();
         }
-     
+        
+        protected float totalSize => Scroller.ViewportSize + (flex + spacing) * (1f + reuseCellMarginCount * 2f);
+
+        protected void UpdateScrollLength()
+        {
+            ScrollLength = 1f / Mathf.Max(cellInterval, 1e-2f) - 1f;
+            if (ItemMappings.Count > 0)
+            {
+                var average = ItemMappings.Average(c => c.CellSize);
+                var averageCellInterval = (average + spacing) / totalSize;
+                ScrollLength = 1f / Mathf.Max(averageCellInterval, 1e-2f) - averageCellInterval/cellInterval + cellInterval;
+                //TODO:ScrollLength不准确，应当是当前滑动界面的长度，而不是所有的长度
+            }
+        }
+
         protected virtual void OnValidate()
         {
             AdjustCellIntervalAndScrollOffset();

@@ -21,12 +21,6 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             scrollView = transform.GetComponentInParent<MutableScrollView>();
         }
 
-        private void OnRectTransformDimensionsChange()
-        {
-            Context.OnCellSizeChanged?.Invoke(rectTransform.sizeDelta);
-            Debug.Log($"OnRectTransformDimensionsChange:{ rectTransform.sizeDelta } {initialSizeData}");
-        }
-
         public override void UpdateContent(MutableItemData itemData)
         {
             message.text = itemData.Message;
