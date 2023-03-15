@@ -100,29 +100,42 @@ namespace FancyScrollView
             }
 
             currentPosition = position;
-            
-            var p = position - scrollOffset / cellInterval;
-            var firstIndex = Mathf.FloorToInt(p);
-            var firstPosition = (Mathf.Floor(p) - p) * cellInterval;
 
+            var (firstIndex,firstPosition) = UpdateFirst(position);
+          
+            Debug.Log(firstPosition);
+            
+            UpdatePool(firstPosition);
+
+            UpdateCells(firstPosition, firstIndex, forceRefresh);
+        }
+
+        /// <summary>
+        /// update current first cell index and position as scroll view offset.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        protected (int first, float pos) UpdateFirst(float position)
+        {
             // if (ItemMappings.Count > 0)
             // {
             //     var first = ItemMappings[0];
             //     var totalSize = (flex + spacing) / cellInterval;
             //     var interval = (first.CellSize + spacing) / totalSize;
             //     p = position - scrollOffset / interval;
+            //     firstIndex = Mathf.FloorToInt(p);
+            //     firstPosition = (Mathf.Floor(p) - p) * cellInterval;
             //
-            //     for (int i = 0; i < ItemMappings.Count; i++)
-            //     {
-            //         var item = ItemMappings[0];
-            //     }
+            //     // for (int i = 0; i < ItemMappings.Count; i++)
+            //     // {
+            //     //     var item = ItemMappings[0];
+            //     // }
             // }
 
-            Debug.Log(firstPosition);
-            
-            UpdatePool(firstPosition);
-
-            UpdateCells(firstPosition, firstIndex, forceRefresh);
+            var p = position - scrollOffset / cellInterval;
+            var firstIndex = Mathf.FloorToInt(p);
+            var firstPosition = (Mathf.Floor(p) - p) * cellInterval;
+            return (firstIndex, firstPosition);
         }
 
         /// <summary>
@@ -187,27 +200,27 @@ namespace FancyScrollView
                 //替换cell
                 if (forceRefresh || cell.Index != index || !cell.IsVisible)
                 {
-                    var cellSize= ItemMappings[index].CellSize;
-                    if(Math.Abs(cell.CellSize - cellSize) > FloatDelta)
-                    {
-                        Debug.Log("replace cell");
-                        var prefab = prefabList[ItemMappings[index].PrefabIndex];
-                        var oldCell = cell;
-                        pool.Remove(oldCell);
-                        oldCell.SetVisible(false);
-                        
-                        cell = Instantiate(prefab, cellContainer)
-                            .GetComponent<MutableCell<TItemData,TContext>>();
-                        pool.Add(cell);
-                        position += ((cell.CellSize - oldCell.CellSize + pre) * 0.5f + spacing) / totalSize;
-                        cell.Initialize();
-                        cell.CellSize = ItemMappings[index].CellSize;
-                        cell.SetContext(Context);
-                        cell.SetVisible(true);
-                        cell.UpdateContent(ItemsSource[index]);
-                        oldCell.Destroy();
-                    }
-                    else
+                    // var cellSize= ItemMappings[index].CellSize;
+                    // if(Math.Abs(cell.CellSize - cellSize) > FloatDelta)
+                    // {
+                    //     Debug.Log("replace cell");
+                    //     var prefab = prefabList[ItemMappings[index].PrefabIndex];
+                    //     var oldCell = cell;
+                    //     pool.Remove(oldCell);
+                    //     oldCell.SetVisible(false);
+                    //     
+                    //     cell = Instantiate(prefab, cellContainer)
+                    //         .GetComponent<MutableCell<TItemData,TContext>>();
+                    //     pool.Add(cell);
+                    //     position += ((cell.CellSize - oldCell.CellSize + pre) * 0.5f + spacing) / totalSize;
+                    //     cell.Initialize();
+                    //     cell.CellSize = ItemMappings[index].CellSize;
+                    //     cell.SetContext(Context);
+                    //     cell.SetVisible(true);
+                    //     cell.UpdateContent(ItemsSource[index]);
+                    //     oldCell.Destroy();
+                    // }
+                    // else
                     {
                         cell.Index = index;
                         cell.SetVisible(true);

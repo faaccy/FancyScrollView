@@ -3,6 +3,7 @@ using System.Linq;
 using EasingCore;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = System.Random;
 
 namespace FancyScrollView.Examples.Sources.ResizeList
 {
@@ -80,7 +81,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             {
                 DataSourceIndex = index,
                 PrefabIndex = index % 2 ==0 ? 0 : 1,
-                CellSize = index%2 ==0 ? 100:200
+                CellSize = index%2 ==0 ? 100: 200
             }).ToArray();
  
             scrollView.UpdateData(items,mappings);

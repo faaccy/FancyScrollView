@@ -247,11 +247,22 @@ namespace FancyScrollView
         protected void UpdateScrollLength()
         {
             ScrollLength = 1f / Mathf.Max(cellInterval, 1e-2f) - 1f;
-            if (ItemMappings.Count > 0)
+            
+            if (ItemMappings.Count <= 0) return;
+            
+            var viewportSize= Scroller.ViewportSize;
+            var sum = 0f;
+            for (var i = 0; i < ItemMappings.Count; i++)
             {
-                var average = ItemMappings.Average(c => c.CellSize);
-                var averageCellInterval = (average + spacing) / totalSize;
-                ScrollLength = 1f / Mathf.Max(averageCellInterval, 1e-2f) -averageCellInterval / cellInterval;
+                var cellSize = ItemMappings[i].CellSize;
+                sum += (cellSize+spacing);
+
+                if (sum >= viewportSize)
+                {
+                    var offset = sum - viewportSize;
+                    ScrollLength = i + offset / (flex+spacing);
+                    break;
+                }
             }
         }
 
