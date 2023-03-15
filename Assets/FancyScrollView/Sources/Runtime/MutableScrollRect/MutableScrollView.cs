@@ -21,8 +21,6 @@ namespace FancyScrollView
         [SerializeField, Range(1e-2f, 1f)] protected float cellInterval = 0.2f;
 
         [SerializeField, Range(0f, 1f)] protected float scrollOffset = 0.5f;
-        
-        [SerializeField, Range(1e-2f, 100f)] protected float maxCellInterval = 1f;
 
         [SerializeField] GameObject[] prefabList;
     
@@ -30,9 +28,9 @@ namespace FancyScrollView
 
         [SerializeField] protected Transform cellContainer = default;
      
-        public int DataCount => ItemsSource.Count;
+        private const float FloatDelta = 1E-6f;
         
-        protected float ScrollSize = 100f;
+        public int DataCount => ItemsSource.Count;
         
         public float PaddingTop
         {
@@ -78,7 +76,6 @@ namespace FancyScrollView
 
         protected virtual void Initialize()
         {
-            
         }
 
         protected virtual void UpdateContents(IList<TItemData> itemsSource,IList<MutablePrefabMapping> mappings)
@@ -105,9 +102,24 @@ namespace FancyScrollView
             currentPosition = position;
             
             var p = position - scrollOffset / cellInterval;
-            var firstIndex = Mathf.CeilToInt(p);
-            var firstPosition = (Mathf.Ceil(p) - p) * cellInterval;
+            var firstIndex = Mathf.FloorToInt(p);
+            var firstPosition = (Mathf.Floor(p) - p) * cellInterval;
 
+            // if (ItemMappings.Count > 0)
+            // {
+            //     var first = ItemMappings[0];
+            //     var totalSize = (flex + spacing) / cellInterval;
+            //     var interval = (first.CellSize + spacing) / totalSize;
+            //     p = position - scrollOffset / interval;
+            //
+            //     for (int i = 0; i < ItemMappings.Count; i++)
+            //     {
+            //         var item = ItemMappings[0];
+            //     }
+            // }
+
+            Debug.Log(firstPosition);
+            
             UpdatePool(firstPosition);
 
             UpdateCells(firstPosition, firstIndex, forceRefresh);
@@ -136,8 +148,8 @@ namespace FancyScrollView
                 pool.Add(cell);
             }
         }
+
         
-        private readonly float _floatDelta = 1E-6f;
 
         /// <summary>
         /// 更新cell的数据和位置
@@ -147,23 +159,19 @@ namespace FancyScrollView
         /// <param name="forceRefresh"></param>
         private void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
         {
-            Debug.Log($"firstPosition:{firstPosition} firstIndex:{firstIndex}");
             var totalSize = (flex+spacing) /cellInterval;
             var position = firstPosition;
-            var pre = flex;
+            var pre = 0f;
             for (var i = 0; i < pool.Count; i++)
             {
                 var index = firstIndex + i;
                 var cell = pool[CircularIndex(index, pool.Count)];
+              
+                var current =  cell.CellSize;
+                var interval = i>0?((current + pre) * 0.5f + spacing) / totalSize : 0f;
                 
-                if (index >= 0)
-                {
-                    var current =  cell.CellSize;
-                    var interval = ((current + pre) * 0.5f + spacing) / totalSize;
-                    position += interval;
-                    pre = current;
-                }
-             
+                position += interval;
+                pre = current;
                 
                 if (loop)
                 {
@@ -173,7 +181,6 @@ namespace FancyScrollView
                 //cell超出范围判定 不能用index来判断,因为index可能是负数
                 if (index < 0 || index >= ItemsSource.Count || position > 1)
                 {
-                    Debug.Log($"index:{index} pos:{position}");
                     cell.SetVisible(false);
                     continue;
                 }
@@ -181,7 +188,7 @@ namespace FancyScrollView
                 if (forceRefresh || cell.Index != index || !cell.IsVisible)
                 {
                     var cellSize= ItemMappings[index].CellSize;
-                    if(Math.Abs(cell.CellSize - cellSize) > _floatDelta)
+                    if(Math.Abs(cell.CellSize - cellSize) > FloatDelta)
                     {
                         Debug.Log("replace cell");
                         var prefab = prefabList[ItemMappings[index].PrefabIndex];

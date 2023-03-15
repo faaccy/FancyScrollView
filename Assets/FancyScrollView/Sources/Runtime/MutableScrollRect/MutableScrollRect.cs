@@ -18,10 +18,19 @@ namespace FancyScrollView
 
         float ScrollLength = 0f;
 
+        /// <summary>
+        /// view port length.(unit:cell count)
+        /// </summary>
         float ViewportLength => ScrollLength - reuseCellMarginCount * 2f;
 
+        /// <summary>
+        /// padding head length.(unit:cell count)
+        /// </summary>
         float PaddingHeadLength => (paddingHead - spacing * 0.5f) / (flex + spacing);
 
+        /// <summary>
+        /// max scrollable cell count.
+        /// </summary>
         float MaxScrollPosition => ItemsSource.Count
             - ScrollLength
             + reuseCellMarginCount * 2f
@@ -48,7 +57,7 @@ namespace FancyScrollView
         }
 
         /// <summary>
-        /// update cell size and relayout
+        /// update cell size and relayout.
         /// </summary>
         /// <param name="index"></param>
         /// <param name="v"></param>
@@ -60,9 +69,9 @@ namespace FancyScrollView
         }
 
         /// <summary>
-        /// <see cref="Scroller"/> のスクロール位置が変更された際の処理.
+        /// scroll position changed event handler.
         /// </summary>
-        /// <param name="p"><see cref="Scroller"/> のスクロール位置.</param>
+        /// <param name="p"></param>
         void OnScrollerValueChanged(float p)
         {
             base.UpdatePosition(ToFancyScrollViewPosition(Scrollable ? p : 0f));
@@ -81,9 +90,9 @@ namespace FancyScrollView
         }
 
         /// <summary>
-        /// スクロール範囲を超えてスクロールされた量に基づいて, スクロールバーのサイズを縮小します.
+        /// update scroll bar size.
         /// </summary>
-        /// <param name="offset">スクロール範囲を超えてスクロールされた量.</param>
+        /// <param name="offset"></param>
         void ShrinkScrollbar(float offset)
         {
             var scale = 1f - ToFancyScrollViewPosition(offset) / (ViewportLength - PaddingHeadLength);
@@ -107,7 +116,7 @@ namespace FancyScrollView
         }
 
         /// <summary>
-        /// <see cref="Scroller"/> の各種状態を更新します.
+        /// refresh scroller.
         /// </summary>
         protected void RefreshScroller()
         {
@@ -122,6 +131,11 @@ namespace FancyScrollView
             }
         }
 
+        /// <summary>
+        /// update datasource and prefab mappings with cell size.
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="mappings"></param>
         protected override void UpdateContents(IList<TItemData> items,IList<MutablePrefabMapping> mappings)
         {
             AdjustCellIntervalAndScrollOffset();
@@ -132,19 +146,19 @@ namespace FancyScrollView
         }
 
         /// <summary>
-        /// スクロール位置を更新します.
+        /// update Scroller position.
         /// </summary>
-        /// <param name="position">スクロール位置.</param>
+        /// <param name="position"></param>
         protected new void UpdatePosition(float position)
         {
             Scroller.Position = ToScrollerPosition(position, 0.5f);
         }
 
         /// <summary>
-        /// 指定したアイテムの位置までジャンプします.
+        /// jump to specified item with alignment.(range:0-1)
         /// </summary>
-        /// <param name="itemIndex">アイテムのインデックス.</param>
-        /// <param name="alignment">ビューポート内におけるセル位置の基準. 0f(先頭) ~ 1f(末尾).</param>
+        /// <param name="itemIndex"></param>
+        /// <param name="alignment"></param>
         protected virtual void JumpTo(int itemIndex, float alignment = 0.5f)
         {
             Scroller.Position = ToScrollerPosition(itemIndex, alignment);
@@ -219,9 +233,7 @@ namespace FancyScrollView
         }
 
         /// <summary>
-        /// 指定された設定を実現するための
-        /// <see cref="FancyScrollView{TItemData,TContext}.cellInterval"/> と
-        /// <see cref="FancyScrollView{TItemData,TContext}.scrollOffset"/> を計算して適用します.
+        /// compute the cell interval and scroll offset.
         /// </summary>
         protected void AdjustCellIntervalAndScrollOffset()
         {
@@ -239,8 +251,7 @@ namespace FancyScrollView
             {
                 var average = ItemMappings.Average(c => c.CellSize);
                 var averageCellInterval = (average + spacing) / totalSize;
-                ScrollLength = 1f / Mathf.Max(averageCellInterval, 1e-2f) - averageCellInterval/cellInterval + cellInterval;
-                //TODO:ScrollLength不准确，应当是当前滑动界面的长度，而不是所有的长度
+                ScrollLength = 1f / Mathf.Max(averageCellInterval, 1e-2f) -averageCellInterval / cellInterval;
             }
         }
 

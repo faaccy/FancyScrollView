@@ -65,10 +65,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
 
         void SelectCell()
         {
-            if (scrollView.DataCount == 0)
-            {
-                return;
-            }
+            if (scrollView.DataCount == 0)  return;
 
             TryParseValue(selectIndexInputField, 0, scrollView.DataCount - 1, index =>
                 scrollView.ScrollTo(index, 0.3f, Ease.InOutQuint, (Alignment)alignmentDropdown.value));
@@ -82,8 +79,8 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             var mappings = items.Select((c,index) => new MutablePrefabMapping()
             {
                 DataSourceIndex = index,
-                PrefabIndex = index == 2 || index==13 ? 0 : 1,
-                CellSize = index==2 || index==13 ? 100:200
+                PrefabIndex = index % 2 ==0 ? 0 : 1,
+                CellSize = index%2 ==0 ? 100:200
             }).ToArray();
  
             scrollView.UpdateData(items,mappings);

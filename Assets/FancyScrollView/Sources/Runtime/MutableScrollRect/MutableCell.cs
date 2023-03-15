@@ -11,6 +11,8 @@ namespace FancyScrollView
     public abstract class MutableCell<TItemData, TContext> : MonoBehaviour where TContext : class, new()
     {
         public int Index = -1;
+        
+        public int PrefabIndex = -1;
 
         public float CellSize { get; set; } = 100f;
 
@@ -28,7 +30,7 @@ namespace FancyScrollView
 
         public abstract void UpdatePosition(float position);
         
-        public virtual void Destroy() => Destroy(gameObject);
+        public virtual void Destroy() => DestroyImmediate(gameObject);
     }
 
     /// <summary>

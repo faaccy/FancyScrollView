@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 1865951358068953829}
   - component: {fileID: 1865951358068953826}
   - component: {fileID: 352471458600884356}
-  - component: {fileID: 8742142688530277043}
   - component: {fileID: 6435962631890139735}
   m_Layer: 5
   m_Name: MutableCellLarge
@@ -121,22 +120,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &8742142688530277043
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1865951358068953824}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c9fc29d350144b8b4cd797e9f475aa8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  message: {fileID: 8720386530366365077}
-  image: {fileID: 1865951358068953826}
-  button: {fileID: 352471458600884356}
-  DisplayName: 
 --- !u!114 &6435962631890139735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,10 +132,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5a23a7e0eaf4df6a8f785547b8f67dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Index: -1
+  PrefabIndex: -1
   message: {fileID: 8720386530366365077}
   image: {fileID: 1865951358068953826}
   button: {fileID: 352471458600884356}
-  DisplayName: 
 --- !u!1 &6700329325592271122
 GameObject:
   m_ObjectHideFlags: 0

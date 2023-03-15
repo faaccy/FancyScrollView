@@ -633,11 +633,10 @@ MonoBehaviour:
   reuseCellMarginCount: 0
   paddingHead: 10
   paddingTail: 10
-  spacing: 10
   flex: 100
+  spacing: 10
   cellInterval: 0.13253012
   scrollOffset: 0.13253012
-  maxCellInterval: 2
   prefabList:
   - {fileID: 1865951358068953824, guid: c1ee12a40dbfd164e9de30cfbc36682c, type: 3}
   - {fileID: 1865951358068953824, guid: 60c4ff4ac2a4d444daba41d88c79f86a, type: 3}
