@@ -80,9 +80,14 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             var mappings = items.Select((c,index) => new MutablePrefabMapping()
             {
                 DataSourceIndex = index,
-                PrefabIndex = index % 2 ==0 ? 0 : 1,
-                CellSize = index%2 ==0 ? 100: 200
+                CellSize = index %2 ==0?  100:100,
             }).ToArray();
+            
+            var random = new Random(2);
+            foreach (var map in mappings)
+            {
+               map.CellSize = random.Next(100,300);
+            }
  
             scrollView.UpdateData(items,mappings);
             SelectCell();

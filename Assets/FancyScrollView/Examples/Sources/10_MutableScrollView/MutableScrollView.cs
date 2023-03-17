@@ -7,6 +7,10 @@ namespace FancyScrollView.Examples.Sources.ResizeList
 {
     public class MutableScrollView : MutableScrollRect<MutableItemData, Context>
     {
+        [SerializeField] GameObject cellPrefab = default;
+        
+        protected override GameObject CellPrefab => cellPrefab;
+
         public void OnCellClicked(Action<int> callback)
         {
             Context.OnCellClicked = callback;

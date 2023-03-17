@@ -12,11 +12,6 @@ namespace FancyScrollView
         public int DataSourceIndex { get; set; }
        
         /// <summary>
-        /// index of the prefab array
-        /// </summary>
-        public int PrefabIndex { get; set; }
-        
-        /// <summary>
         /// cell size of the  FlexBase
         /// </summary>
         public float CellSize { get; set; }

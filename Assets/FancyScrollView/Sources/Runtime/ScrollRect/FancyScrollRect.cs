@@ -83,7 +83,7 @@ namespace FancyScrollView
 
         float PaddingHeadLength => (paddingHead - spacing * 0.5f) / (CellSize + spacing);
         
-        float HeadLength => (head - spacing * 0.5f) / (CellSize + spacing);
+        float HeadLength => head>0?(head - spacing * 0.5f) / (CellSize + spacing) : 0f;
 
         float MaxScrollPosition => ItemsSource.Count
             - ScrollLength
@@ -113,7 +113,9 @@ namespace FancyScrollView
         /// <param name="p"><see cref="Scroller"/> のスクロール位置.</param>
         void OnScrollerValueChanged(float p)
         {
-            base.UpdatePosition(ToFancyScrollViewPosition(Scrollable ? p : 0f));
+            var position = ToFancyScrollViewPosition(Scrollable ? p : 0f);
+            Debug.Log($"p:{p} position:{position}");
+            base.UpdatePosition(position);
 
             if (Scroller.Scrollbar)
             {

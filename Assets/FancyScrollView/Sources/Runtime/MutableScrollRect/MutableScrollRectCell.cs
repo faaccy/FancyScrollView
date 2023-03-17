@@ -10,8 +10,10 @@ namespace FancyScrollView
    /// <typeparam name="TContext"></typeparam>
     public abstract class MutableScrollRectCell<TItemData, TContext> : MutableCell<TItemData, TContext>
         where TContext : class, IMutableScrollRectContext, new()
-    {
-         /// <summary>
+   {
+       protected RectTransform RectTransform => GetComponent<RectTransform>();
+
+        /// <summary>
          /// update cell position.
          /// </summary>
          /// <param name="position"></param>
@@ -41,11 +43,24 @@ namespace FancyScrollView
         /// </summary>
         protected void OnRectTransformDimensionsChange()
         {
-            var rectTransform = GetComponent<RectTransform>();
-            Context.OnCellSizeChanged?.Invoke(Index,rectTransform.sizeDelta);
+            if (isManual) return;
+        
+            Context.OnCellSizeChanged?.Invoke(Index,RectTransform.sizeDelta);
             CellSize = Context.ScrollDirection == ScrollDirection.Horizontal
-                ? rectTransform.sizeDelta.x
-                : rectTransform.sizeDelta.y;
+                ? RectTransform.sizeDelta.x
+                : RectTransform.sizeDelta.y;
+        }
+
+        private bool isManual = false;
+        //todo:animate cell size change.
+        public override void UpdateSize(float cellSize)
+        {
+            isManual = true;
+            CellSize = cellSize;
+            RectTransform.sizeDelta = Context.ScrollDirection == ScrollDirection.Horizontal
+                ? new Vector2(cellSize, RectTransform.sizeDelta.y)
+                : new Vector2( RectTransform.sizeDelta.x,cellSize);
+            isManual = false;
         }
     }
 

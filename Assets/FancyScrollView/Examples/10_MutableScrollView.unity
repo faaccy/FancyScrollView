@@ -631,17 +631,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   reuseCellMarginCount: 0
-  paddingHead: 10
-  paddingTail: 10
+  paddingHead: 0
+  paddingTail: 0
   flex: 100
-  spacing: 10
-  cellInterval: 0.13253012
-  scrollOffset: 0.13253012
-  prefabList:
-  - {fileID: 1865951358068953824, guid: c1ee12a40dbfd164e9de30cfbc36682c, type: 3}
-  - {fileID: 1865951358068953824, guid: 60c4ff4ac2a4d444daba41d88c79f86a, type: 3}
+  spacing: 0
+  cellInterval: 0.12195122
+  scrollOffset: 0.12195122
   loop: 0
   cellContainer: {fileID: 1230771801}
+  cellPrefab: {fileID: 1865951358068953824, guid: c1ee12a40dbfd164e9de30cfbc36682c,
+    type: 3}
 --- !u!114 &190094664
 MonoBehaviour:
   m_ObjectHideFlags: 0

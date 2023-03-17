@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace FancyScrollView
@@ -22,14 +23,12 @@ namespace FancyScrollView
 
         [SerializeField, Range(0f, 1f)] protected float scrollOffset = 0.5f;
 
-        [SerializeField] GameObject[] prefabList;
+        protected abstract GameObject CellPrefab { get; }
     
         [SerializeField] protected bool loop = false;
 
         [SerializeField] protected Transform cellContainer = default;
      
-        private const float FloatDelta = 1E-6f;
-        
         public int DataCount => ItemsSource.Count;
         
         public float PaddingTop
@@ -102,8 +101,6 @@ namespace FancyScrollView
             currentPosition = position;
 
             var (firstIndex,firstPosition) = UpdateFirst(position);
-          
-            Debug.Log(firstPosition);
             
             UpdatePool(firstPosition);
 
@@ -117,24 +114,27 @@ namespace FancyScrollView
         /// <returns></returns>
         protected (int first, float pos) UpdateFirst(float position)
         {
-            // if (ItemMappings.Count > 0)
-            // {
-            //     var first = ItemMappings[0];
-            //     var totalSize = (flex + spacing) / cellInterval;
-            //     var interval = (first.CellSize + spacing) / totalSize;
-            //     p = position - scrollOffset / interval;
-            //     firstIndex = Mathf.FloorToInt(p);
-            //     firstPosition = (Mathf.Floor(p) - p) * cellInterval;
-            //
-            //     // for (int i = 0; i < ItemMappings.Count; i++)
-            //     // {
-            //     //     var item = ItemMappings[0];
-            //     // }
-            // }
-
             var p = position - scrollOffset / cellInterval;
-            var firstIndex = Mathf.FloorToInt(p);
-            var firstPosition = (Mathf.Floor(p) - p) * cellInterval;
+            var firstIndex = Mathf.CeilToInt(p);
+            var firstPosition = (Mathf.Ceil(p) - p) * cellInterval;
+            //todo: 优化 滑动偏移量
+            // if (pool.Count > 0)
+            // {
+            //     
+            //     var orderedPool = pool.OrderBy(x => x.Position).ToList();
+            //     foreach (var cell in orderedPool)
+            //     {
+            //         if (cell.Index == firstIndex)
+            //         {
+            //             p = position-cell.Position;
+            //             firstIndex = Mathf.CeilToInt(p);
+            //             firstPosition = (Mathf.Ceil(p) - p) * cellInterval;
+            //             break;
+            //         }
+            //     }
+            // }
+            Debug.Log($"index {firstIndex}");
+          
             return (firstIndex, firstPosition);
         }
 
@@ -152,17 +152,16 @@ namespace FancyScrollView
             for (var i = 0; i < addCount; i++)
             {
                 var cellSize = ItemMappings[i].CellSize;
-                var prefab = prefabList[ItemMappings[i].PrefabIndex];
-                var cell = Instantiate(prefab, cellContainer)
+              
+                var cell = Instantiate(CellPrefab, cellContainer)
                     .GetComponent<MutableCell<TItemData,TContext>>();
+                cell.SetContext(Context);
                 cell.Initialize();
-                cell.CellSize = cellSize;
+                cell.UpdateSize(cellSize);
                 cell.SetVisible(false);
                 pool.Add(cell);
             }
         }
-
-        
 
         /// <summary>
         /// 更新cell的数据和位置
@@ -172,17 +171,16 @@ namespace FancyScrollView
         /// <param name="forceRefresh"></param>
         private void UpdateCells(float firstPosition, int firstIndex, bool forceRefresh)
         {
-            var totalSize = (flex+spacing) /cellInterval;
             var position = firstPosition;
             var pre = 0f;
             for (var i = 0; i < pool.Count; i++)
             {
                 var index = firstIndex + i;
                 var cell = pool[CircularIndex(index, pool.Count)];
-              
-                var current =  cell.CellSize;
-                var interval = i>0?((current + pre) * 0.5f + spacing) / totalSize : 0f;
-                
+                //var position = firstPosition + i * cellInterval;
+                var current= cell.CellSize;
+                var interval = GetCurrentInterval(i,current,pre);
+                var prePosition = position;
                 position += interval;
                 pre = current;
                 
@@ -191,8 +189,8 @@ namespace FancyScrollView
                     index = CircularIndex(index, ItemsSource.Count);
                 }
 
-                //cell超出范围判定 不能用index来判断,因为index可能是负数
-                if (index < 0 || index >= ItemsSource.Count || position > 1)
+                //cell超出范围判定
+                if (index < 0 || index >= ItemsSource.Count || position > 1f)
                 {
                     cell.SetVisible(false);
                     continue;
@@ -200,38 +198,27 @@ namespace FancyScrollView
                 //替换cell
                 if (forceRefresh || cell.Index != index || !cell.IsVisible)
                 {
-                    // var cellSize= ItemMappings[index].CellSize;
-                    // if(Math.Abs(cell.CellSize - cellSize) > FloatDelta)
-                    // {
-                    //     Debug.Log("replace cell");
-                    //     var prefab = prefabList[ItemMappings[index].PrefabIndex];
-                    //     var oldCell = cell;
-                    //     pool.Remove(oldCell);
-                    //     oldCell.SetVisible(false);
-                    //     
-                    //     cell = Instantiate(prefab, cellContainer)
-                    //         .GetComponent<MutableCell<TItemData,TContext>>();
-                    //     pool.Add(cell);
-                    //     position += ((cell.CellSize - oldCell.CellSize + pre) * 0.5f + spacing) / totalSize;
-                    //     cell.Initialize();
-                    //     cell.CellSize = ItemMappings[index].CellSize;
-                    //     cell.SetContext(Context);
-                    //     cell.SetVisible(true);
-                    //     cell.UpdateContent(ItemsSource[index]);
-                    //     oldCell.Destroy();
-                    // }
-                    // else
+                    var cellSize= ItemMappings[index].CellSize;
+                    if(cell.CellSize != cellSize)
                     {
-                        cell.Index = index;
-                        cell.SetVisible(true);
-                        cell.SetContext(Context);
-                        cell.UpdateContent(ItemsSource[index]);
+                        Debug.Log($"replace cell {cell.Index}-{cell.CellSize} : {index}-{cellSize}");
+                        var changeInterval = GetCurrentInterval(i,current,pre);
+                        position = prePosition + changeInterval;
+                        cell.UpdateSize(cellSize);
                     }
+                    
+                    cell.Index = index;
+                    cell.SetVisible(true);
+                    cell.UpdateContent(ItemsSource[index]);
                 }
                 cell.UpdatePosition(position);
             }
         }
+        
+        protected float GetCurrentInterval(int i,float current,float pre) => i>0 ? ((current + pre) * 0.5f + spacing ) / totalSize: (current - flex )* 0.5f/ totalSize;
 
+        protected float totalSize => (flex+spacing) /cellInterval;
+        
         protected int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
 
 #if UNITY_EDITOR

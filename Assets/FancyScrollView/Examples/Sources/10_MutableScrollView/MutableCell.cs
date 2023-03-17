@@ -9,15 +9,11 @@ namespace FancyScrollView.Examples.Sources.ResizeList
         [SerializeField] Image image = default;
         [SerializeField] Button button = default;
         private MutableScrollView scrollView = default;
-        
-        private RectTransform rectTransform { get; set; }
-        private Vector3 initialSizeData { get; set; }
 
         public override void Initialize()
         {
             button.onClick.AddListener(() => Context.OnCellClicked?.Invoke(Index));
-            rectTransform = (RectTransform)transform;
-            initialSizeData = rectTransform.sizeDelta;
+         
             scrollView = transform.GetComponentInParent<MutableScrollView>();
         }
 
@@ -29,6 +25,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             image.color = selected
                 ? new Color32(0, 255, 255, 100)
                 : new Color32(255, 255, 255, 77);
+            
         }
     }
 }

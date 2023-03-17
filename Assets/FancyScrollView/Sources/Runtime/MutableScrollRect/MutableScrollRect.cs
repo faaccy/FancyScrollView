@@ -31,11 +31,12 @@ namespace FancyScrollView
         /// <summary>
         /// max scrollable cell count.
         /// </summary>
-        float MaxScrollPosition => ItemsSource.Count
-            - ScrollLength
-            + reuseCellMarginCount * 2f
-            + (paddingHead + paddingTail - spacing) / (flex + spacing);
+        float MaxScrollPosition => flexCount
+                                   - ScrollLength
+                                   + reuseCellMarginCount * 2f
+                                   + (paddingHead + paddingTail - spacing) / (flex + spacing);
 
+        float flexCount => Mathf.Ceil(ItemMappings.Sum(c => c.CellSize) / flex);  
         /// <inheritdoc/>
         protected override void Initialize()
         {
@@ -59,10 +60,11 @@ namespace FancyScrollView
         /// <summary>
         /// update cell size and relayout.
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">index of data</param>
         /// <param name="v"></param>
         private void OnCellSizeChanged(int index,Vector3 v)
         {
+            Debug.Log($"OnCellSizeChanged:{index} {v}");
             ItemMappings[index].CellSize = v.y;
             pool[CircularIndex(index,pool.Count)].CellSize = v.y;
             Relayout();
@@ -74,13 +76,15 @@ namespace FancyScrollView
         /// <param name="p"></param>
         void OnScrollerValueChanged(float p)
         {
-            base.UpdatePosition(ToFancyScrollViewPosition(Scrollable ? p : 0f));
+            var position = ToFancyScrollViewPosition(Scrollable ? p : 0);
+            Debug.Log($"p:{p} position:{position}");
+            base.UpdatePosition(position);
 
             if (Scroller.Scrollbar)
             {
-                if (p > ItemsSource.Count - 1)
+                if (p > flexCount-1)
                 {
-                    ShrinkScrollbar(p - (ItemsSource.Count - 1));
+                    ShrinkScrollbar(p - (flexCount - 1));
                 }
                 else if (p < 0f)
                 {
@@ -195,7 +199,7 @@ namespace FancyScrollView
         /// <param name="viewportLength">ビューポートのサイズ.</param>
         protected void UpdateScrollbarSize(float viewportLength)
         {
-            var contentLength = Mathf.Max(ItemsSource.Count + (paddingHead + paddingTail - spacing) / (flex + spacing), 1);
+            var contentLength = Mathf.Max(flexCount + (paddingHead + paddingTail - spacing) / (flex + spacing), 1);
             Scroller.Scrollbar.size = Scrollable ? Mathf.Clamp01(viewportLength / contentLength) : 1f;
         }
 
@@ -206,7 +210,7 @@ namespace FancyScrollView
         /// <returns><see cref="FancyScrollRect{TItemData, TContext}"/> が扱うスクロール位置.</returns>
         protected float ToFancyScrollViewPosition(float position)
         {
-            return position / Mathf.Max(ItemsSource.Count - 1, 1) * MaxScrollPosition - PaddingHeadLength;
+            return position / Mathf.Max(flexCount - 1, 1) * MaxScrollPosition - PaddingHeadLength;
         }
 
         /// <summary>
@@ -216,7 +220,7 @@ namespace FancyScrollView
         /// <returns><see cref="Scroller"/> が扱うスクロール位置.</returns>
         protected float ToScrollerPosition(float position)
         {
-            return (position + PaddingHeadLength) / MaxScrollPosition * Mathf.Max(ItemsSource.Count - 1, 1);
+            return (position + PaddingHeadLength) / MaxScrollPosition * Mathf.Max(flexCount - 1, 1);
         }
 
         /// <summary>
@@ -239,32 +243,17 @@ namespace FancyScrollView
         {
             cellInterval = (flex + spacing) / totalSize;
             scrollOffset = cellInterval * (1f + reuseCellMarginCount);
-            UpdateScrollLength();
-        }
-        
-        protected float totalSize => Scroller.ViewportSize + (flex + spacing) * (1f + reuseCellMarginCount * 2f);
 
-        protected void UpdateScrollLength()
-        {
-            ScrollLength = 1f / Mathf.Max(cellInterval, 1e-2f) - 1f;
-            
-            if (ItemMappings.Count <= 0) return;
-            
-            var viewportSize= Scroller.ViewportSize;
-            var sum = 0f;
-            for (var i = 0; i < ItemMappings.Count; i++)
+            if (ItemMappings.Count > 0)
             {
-                var cellSize = ItemMappings[i].CellSize;
-                sum += (cellSize+spacing);
-
-                if (sum >= viewportSize)
-                {
-                    var offset = sum - viewportSize;
-                    ScrollLength = i + offset / (flex+spacing);
-                    break;
-                }
+                var average = ItemMappings.Select(c => c.CellSize).Average();
+                var maxCellSize = ItemMappings.Select(c => c.CellSize).Max();
+                var ratio = maxCellSize / flex;
+                ScrollLength = 1f / Mathf.Max(cellInterval, 1e-2f) - ratio;
             }
         }
+        
+        protected float totalSize => Scroller.ViewportSize+ (flex + spacing) * (1f + reuseCellMarginCount * 2f);
 
         protected virtual void OnValidate()
         {

@@ -12,8 +12,6 @@ namespace FancyScrollView
     {
         public int Index = -1;
         
-        public int PrefabIndex = -1;
-
         public float CellSize { get; set; } = 100f;
 
         public virtual bool IsVisible => gameObject.activeSelf;
@@ -29,7 +27,9 @@ namespace FancyScrollView
         public abstract void UpdateContent(TItemData itemData);
 
         public abstract void UpdatePosition(float position);
-        
+
+        public virtual void UpdateSize(float cellSize){ }
+
         public virtual void Destroy() => DestroyImmediate(gameObject);
     }
 
