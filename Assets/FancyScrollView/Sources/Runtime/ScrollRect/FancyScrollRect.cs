@@ -36,8 +36,8 @@ namespace FancyScrollView
         /// コンテンツ先頭の余白.
         /// </summary>
         [SerializeField] protected float paddingHead = 0f;
-        
-        [SerializeField] protected float head = 0f;
+
+        [SerializeField] protected float head { get; set; } = 0f;
 
         /// <summary>
         /// コンテンツ末尾の余白.

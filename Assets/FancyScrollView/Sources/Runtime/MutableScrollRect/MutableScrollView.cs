@@ -12,6 +12,9 @@ namespace FancyScrollView
         [SerializeField] public float paddingHead = 0f;
 
         [SerializeField] public float paddingTail = 0f;
+
+        [SerializeField] public float head = 0f;
+
         /// <summary>
         /// cell基准大小,当cell大小不一致时,取平均值或者较小值
         /// </summary>
@@ -20,10 +23,14 @@ namespace FancyScrollView
         [SerializeField] public float spacing = 0f;
 
         [SerializeField, Range(1e-2f, 1f)] protected float cellInterval = 0.2f;
+        
+        [SerializeField] protected float headInterval = 0f;
 
         [SerializeField, Range(0f, 1f)] protected float scrollOffset = 0.5f;
 
         protected abstract GameObject CellPrefab { get; }
+        
+        protected abstract GameObject Header { get; }
     
         [SerializeField] protected bool loop = false;
 
@@ -114,25 +121,10 @@ namespace FancyScrollView
         /// <returns></returns>
         protected (int first, float pos) UpdateFirst(float position)
         {
-            var p = position - scrollOffset / cellInterval;
+            var p = position - (scrollOffset) / cellInterval ;
             var firstIndex = Mathf.CeilToInt(p);
             var firstPosition = (Mathf.Ceil(p) - p) * cellInterval;
-            //todo: 优化 滑动偏移量
-            // if (pool.Count > 0)
-            // {
-            //     
-            //     var orderedPool = pool.OrderBy(x => x.Position).ToList();
-            //     foreach (var cell in orderedPool)
-            //     {
-            //         if (cell.Index == firstIndex)
-            //         {
-            //             p = position-cell.Position;
-            //             firstIndex = Mathf.CeilToInt(p);
-            //             firstPosition = (Mathf.Ceil(p) - p) * cellInterval;
-            //             break;
-            //         }
-            //     }
-            // }
+        
             Debug.Log($"index {firstIndex}");
           
             return (firstIndex, firstPosition);
@@ -212,14 +204,30 @@ namespace FancyScrollView
                     cell.UpdateContent(ItemsSource[index]);
                 }
                 cell.UpdatePosition(position);
+                
+                UpdateHeader(index);
             }
         }
         
-        protected float GetCurrentInterval(int i,float current,float pre) => i>0 ? ((current + pre) * 0.5f + spacing ) / totalSize: (current - flex )* 0.5f/ totalSize;
+        protected float GetCurrentInterval(int i,float current,float pre) => i>0 ? ((current + pre) * 0.5f + spacing ) / totalSize: (((current-flex)* 0.5f))/ totalSize;
 
-        protected float totalSize => (flex+spacing) /cellInterval;
+        protected virtual float totalSize => (flex+spacing) /cellInterval;
         
         protected int CircularIndex(int i, int size) => size < 1 ? 0 : i < 0 ? size - 1 + (i + 1) % size : i % size;
+        
+        /// <summary>
+        /// update header position.
+        /// </summary>
+        /// <param name="index"></param>
+        protected virtual void UpdateHeader(int index)
+        {
+            if (index != 0 || Header == null) return;
+            
+            var cell = pool[CircularIndex(index, pool.Count)];
+            var firstCellPosition = cell.transform.localPosition;
+            firstCellPosition.y+=(head+ cell.CellSize + 2 * spacing) * 0.5f;
+            Header.transform.localPosition = firstCellPosition;
+        }
 
 #if UNITY_EDITOR
         bool cachedLoop;

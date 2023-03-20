@@ -8,8 +8,11 @@ namespace FancyScrollView.Examples.Sources.ResizeList
     public class MutableScrollView : MutableScrollRect<MutableItemData, Context>
     {
         [SerializeField] GameObject cellPrefab = default;
+        [SerializeField] GameObject header = default;
         
         protected override GameObject CellPrefab => cellPrefab;
+
+        protected override GameObject Header => header;
 
         public void OnCellClicked(Action<int> callback)
         {

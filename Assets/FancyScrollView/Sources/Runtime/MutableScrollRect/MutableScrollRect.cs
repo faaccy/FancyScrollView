@@ -27,6 +27,8 @@ namespace FancyScrollView
         /// padding head length.(unit:cell count)
         /// </summary>
         float PaddingHeadLength => (paddingHead - spacing * 0.5f) / (flex + spacing);
+        
+        float HeadLength => head>0?(head - spacing * 0.5f) / (flex + spacing) : 0f;
 
         /// <summary>
         /// max scrollable cell count.
@@ -34,7 +36,7 @@ namespace FancyScrollView
         float MaxScrollPosition => flexCount
                                    - ScrollLength
                                    + reuseCellMarginCount * 2f
-                                   + (paddingHead + paddingTail - spacing) / (flex + spacing);
+                                   + (paddingHead + paddingTail + head - spacing) / (flex + spacing);
 
         float flexCount => Mathf.Ceil(ItemMappings.Sum(c => c.CellSize) / flex);  
         /// <inheritdoc/>
@@ -199,7 +201,7 @@ namespace FancyScrollView
         /// <param name="viewportLength">ビューポートのサイズ.</param>
         protected void UpdateScrollbarSize(float viewportLength)
         {
-            var contentLength = Mathf.Max(flexCount + (paddingHead + paddingTail - spacing) / (flex + spacing), 1);
+            var contentLength = Mathf.Max(flexCount + (paddingHead + paddingTail + head - spacing) / (flex + spacing), 1);
             Scroller.Scrollbar.size = Scrollable ? Mathf.Clamp01(viewportLength / contentLength) : 1f;
         }
 
@@ -242,7 +244,8 @@ namespace FancyScrollView
         protected void AdjustCellIntervalAndScrollOffset()
         {
             cellInterval = (flex + spacing) / totalSize;
-            scrollOffset = cellInterval * (1f + reuseCellMarginCount);
+            headInterval = (head+ spacing) / totalSize;
+            scrollOffset = cellInterval * (1f + reuseCellMarginCount) ;  
 
             if (ItemMappings.Count > 0)
             {
@@ -253,7 +256,7 @@ namespace FancyScrollView
             }
         }
         
-        protected float totalSize => Scroller.ViewportSize+ (flex + spacing) * (1f + reuseCellMarginCount * 2f);
+        protected override float totalSize => Scroller.ViewportSize+ (flex + spacing) * (1f + reuseCellMarginCount * 2f);
 
         protected virtual void OnValidate()
         {

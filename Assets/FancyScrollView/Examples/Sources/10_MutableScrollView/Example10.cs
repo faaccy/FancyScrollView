@@ -45,7 +45,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
                 TryParseValue(dataCountInputField, 1, 99999, GenerateCells));
             dataCountInputField.text = "20";
 
-            scrollView.JumpTo(selectIndex);
+            //scrollView.JumpTo(selectIndex);
         }
 
         void TryParseValue(InputField inputField, int min, int max, Action<int> success)
@@ -66,6 +66,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
 
         void SelectCell()
         {
+            return;
             if (scrollView.DataCount == 0)  return;
 
             TryParseValue(selectIndexInputField, 0, scrollView.DataCount - 1, index =>
@@ -90,7 +91,7 @@ namespace FancyScrollView.Examples.Sources.ResizeList
             }
  
             scrollView.UpdateData(items,mappings);
-            SelectCell();
+            //SelectCell();
         }
     }
 }
