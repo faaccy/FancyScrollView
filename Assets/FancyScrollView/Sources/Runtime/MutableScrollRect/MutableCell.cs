@@ -28,7 +28,7 @@ namespace FancyScrollView
 
         public abstract void UpdatePosition(float position);
 
-        public virtual void UpdateSize(float cellSize){ }
+        public virtual void UpdateSize(float cellSize,bool forceUpdate = false){ }
 
         public virtual void Destroy() => DestroyImmediate(gameObject);
     }

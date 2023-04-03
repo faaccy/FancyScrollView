@@ -124,8 +124,31 @@ namespace FancyScrollView
             var p = position - (scrollOffset) / cellInterval ;
             var firstIndex = Mathf.CeilToInt(p);
             var firstPosition = (Mathf.Ceil(p) - p) * cellInterval;
-        
-            Debug.Log($"index {firstIndex}");
+
+             // if (ItemMappings.Count > 0 && firstIndex >0)
+             // {
+             //     firstIndex = ItemMappings[firstIndex-1].DataSourceIndex;
+             //     firstPosition = (Mathf.Ceil(p) - p) * (ItemMappings[firstIndex-1].CellSize + spacing) / totalSize;
+             // }
+             //
+             var sum = 0f;
+             var currentIndex = 0;
+             var currentPosition = 0f;
+            
+             foreach (var item in ItemMappings)
+             {
+                 var currentInterVal = (item.CellSize + spacing) / totalSize;
+            
+                 if (sum + currentInterVal > p)
+                     break;
+            
+                 sum += currentInterVal;
+            
+                 currentIndex = item.DataSourceIndex;
+                 currentPosition = (p - sum) * cellInterval;
+             }
+
+            Debug.Log($"index{firstIndex} firstPosition{firstPosition} p{p} position{position} scrollOffset{scrollOffset} sum{sum} currentIndex{currentIndex} currentPosition{currentPosition} ");
           
             return (firstIndex, firstPosition);
         }
@@ -209,7 +232,7 @@ namespace FancyScrollView
             }
         }
         
-        protected float GetCurrentInterval(int i,float current,float pre) => i>0 ? ((current + pre) * 0.5f + spacing ) / totalSize: (((current-flex)* 0.5f))/ totalSize;
+        protected float GetCurrentInterval(int i,float current,float pre) => i>0 ? ((current + pre) * 0.5f + spacing) / totalSize : (((current-flex)* 0.5f))/ totalSize;
 
         protected virtual float totalSize => (flex+spacing) /cellInterval;
         

@@ -38,7 +38,7 @@ namespace FancyScrollView
                                    + reuseCellMarginCount * 2f
                                    + (paddingHead + paddingTail + head - spacing) / (flex + spacing);
 
-        float flexCount => Mathf.Ceil(ItemMappings.Sum(c => c.CellSize) / flex);  
+        float flexCount => Mathf.CeilToInt(ItemMappings.Sum(c => c.CellSize) / flex);  
         /// <inheritdoc/>
         protected override void Initialize()
         {
@@ -79,7 +79,6 @@ namespace FancyScrollView
         void OnScrollerValueChanged(float p)
         {
             var position = ToFancyScrollViewPosition(Scrollable ? p : 0);
-            Debug.Log($"p:{p} position:{position}");
             base.UpdatePosition(position);
 
             if (Scroller.Scrollbar)
@@ -244,19 +243,18 @@ namespace FancyScrollView
         protected void AdjustCellIntervalAndScrollOffset()
         {
             cellInterval = (flex + spacing) / totalSize;
-            headInterval = (head+ spacing) / totalSize;
-            scrollOffset = cellInterval * (1f + reuseCellMarginCount) ;  
+            //headInterval = (head+ spacing) / totalSize;
+            scrollOffset = cellInterval * (1f+reuseCellMarginCount ) ; 
 
             if (ItemMappings.Count > 0)
             {
-                var average = ItemMappings.Select(c => c.CellSize).Average();
-                var maxCellSize = ItemMappings.Select(c => c.CellSize).Max();
-                var ratio = maxCellSize / flex;
-                ScrollLength = 1f / Mathf.Max(cellInterval, 1e-2f) - ratio;
+                var offset = ItemMappings.Select(c => c.CellSize-flex).Sum();
+                var ratio = Mathf.Max(offset / totalSize, 1);
+                ScrollLength = 1f / Mathf.Max(cellInterval, 1e-2f)-ratio;
             }
         }
         
-        protected override float totalSize => Scroller.ViewportSize+ (flex + spacing) * (1f + reuseCellMarginCount * 2f);
+        protected override float totalSize => Scroller.ViewportSize+ (flex + spacing) * (1f + reuseCellMarginCount * 2f) + head;
 
         protected virtual void OnValidate()
         {

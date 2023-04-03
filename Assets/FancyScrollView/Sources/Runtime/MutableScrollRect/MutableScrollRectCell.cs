@@ -38,29 +38,23 @@ namespace FancyScrollView
                 ? new Vector2(-localPosition, 0)
                 : new Vector2(0, localPosition);
         }
-        /// <summary>
-        /// handle cell size changed event.
-        /// </summary>
-        protected void OnRectTransformDimensionsChange()
-        {
-            if (isManual) return;
         
-            Context.OnCellSizeChanged?.Invoke(Index,RectTransform.sizeDelta);
-            CellSize = Context.ScrollDirection == ScrollDirection.Horizontal
-                ? RectTransform.sizeDelta.x
-                : RectTransform.sizeDelta.y;
-        }
-
-        private bool isManual = false;
-        //todo:animate cell size change.
-        public override void UpdateSize(float cellSize)
+        /// <summary>
+        /// update cell size.
+        /// </summary>
+        /// <param name="cellSize">size of cell.</param>
+        /// <param name="forceUpdate">update layout.</param>
+        public override void UpdateSize(float cellSize,bool forceUpdate = false)
         {
-            isManual = true;
             CellSize = cellSize;
             RectTransform.sizeDelta = Context.ScrollDirection == ScrollDirection.Horizontal
                 ? new Vector2(cellSize, RectTransform.sizeDelta.y)
                 : new Vector2( RectTransform.sizeDelta.x,cellSize);
-            isManual = false;
+
+            if (forceUpdate)
+            {
+                Context.OnCellSizeChanged?.Invoke(Index,RectTransform.sizeDelta);
+            }
         }
     }
 
